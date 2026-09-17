@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard · {{ app_name }}{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+  <div>
+    <h3 class="mb-0">Network Monitoring &amp; Troubleshooting Dashboard</h3>
+    <span class="text-muted small">
+      {% if stats.last_checked_at %}
+        Last connectivity check: <strong>{{ stats.last_checked_at }}</strong>
+      {% else %}
+        No connectivity checks have been run yet
+      {% endif %}
+    </span>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('troubleshooting') }}" class="btn btn-outline-primary">Troubleshooting guides</a>
+    <a href="{{ url_for('new_device') }}" class="btn btn-primary">+ Add device</a>
+  </div>
+</div>
+
+<!-- Stat cards -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="card stat-card h-100"><div class="card-body">
+      <div class="stat-label">Total devices</div>
+      <div class="stat-value">{{ stats.total }}</div>
+      <small class="text-muted">Saved in the tracker</small>
+    </div></div>
+  </div>
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="card stat-card st-card-online h-100"><div class="card-body">
+      <div class="stat-label">Online</div>
+      <div class="stat-value">{{ stats.online }}</div>
+      <small class="text-muted">Responded to latest ping</small>
+    </div></div>
+  </div>
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="card stat-card st-card-offline h-100"><div class="card-body">
+      <div class="stat-label">Offline</div>
+      <div class="stat-value">{{ stats.offline }}</div>
+      <small class="text-muted">No reply from latest ping</small>
+    </div></div>
+  </div>
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="card stat-card st-card-error h-100"><div class="card-body">
+      <div class="stat-label">Check errors</div>
+      <div class="stat-value">{{ stats.errors }}</div>
+      <small class="text-muted">Ping could not run</small>
+    </div></div>
+  </div>
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="card stat-card st-card-none h-100"><div class="card-body">
+      <div class="stat-label">Not checked</div>
+      <div class="stat-value">{{ stats.not_checked }}</div>
+      <small class="text-muted">Awaiting first check</small>
+    </div></div>
+  </div>
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="card stat-card st-card-latency h-100"><div class="card-body">
+      <div class="stat-label">Avg response</div>
+      <div class="stat-value">
+        {% if stats.avg_response_ms is not none %}{{ stats.avg_response_ms }}<span class="stat-unit">ms</span>
+        {% else %}—{% endif %}
+      </div>
+      <small class="text-muted">Across {{ stats.online }} online device{{ 's' if stats.online != 1 else '' }}</small>
+    </div></div>
+  </div>
+</div>
+
+<!-- Chart + latency rows -->
+<div class="row g-3 mb-4">
+  <div class="col-12 col-lg-6">
+    <div class="card shadow-sm h-100"><div class="card-body">
+      <h5 class="fw-semibold mb-1">Online vs Offline</h5>
+      <p class="text-muted small mb-3">Breakdown of the latest check results for {{ stats.checked }} checked device{{ 's' if stats.checked != 1 else '' }}.</p>
+
+      {% if chart.checked %}
+      <div class="chart-wrap mb-3">
+        {% for segment in chart.segments %}
+          {% if segment.count %}
+          <div class="chart-segment {{ segment.klass }}" style="width: {{ segment.width }}%"
+               title="{{ segment.label }}: {{ segment.count }}"></div>
+          {% endif %}
+        {% endfor %}
+      </div>
+      <div class="chart-legend d-flex flex-wrap gap-3">
+        {% for segment in chart.segments %}
+          <span class="legend-item">
+            <span class="legend-dot {{ segment.klass }}"></span>
+            {{ segment.label }}
+            <strong>{{ segment.count }}</strong> ({{ segment.width }}%)
+          </span>
+        {% endfor %}
+      </div>
+      {% else %}
+        <div class="text-muted small py-3">Run a connectivity check on the
+          <a href="{{ url_for('list_devices') }}">Devices</a> page to populate this chart.</div>
+      {% endif %}
+    </div></div>
+  </div>
+
+  <div class="col-12 col-lg-6">
+    <div class="card shadow-sm h-100"><div class="card-body">
+      <h5 class="fw-semibold mb-1">Latest response times</h5>
+      <p class="text-muted small mb-3">Real round-trip times of the fastest-to-slowest online devices.</p>
+
+      {% if latencies %}
+        <div class="latency-list">
+          {% for item in latencies %}
+          <div class="latency-row">
+            <div class="d-flex justify-content-between small mb-1">
+              <span class="text-truncate me-2">
+                <strong>{{ item.name }}</strong> · <span class="text-muted">{{ item.ip_address }}</span>
+              </span>
+              <span class="fw-semibold">{{ item.response_ms }} ms</span>
+            </div>
+            <div class="latency-track">
+              <div class="latency-bar" style="width: {{ item.width }}%"></div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="text-muted small py-3">No response times recorded yet.</div>
+      {% endif %}
+    </div></div>
+  </div>
+</div>
+
+<!-- Recent connectivity failures -->
+<div class="row g-3 mb-4">
+  <div class="col-12">
+    <div class="card shadow-sm"><div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-semibold mb-0">Recent connectivity failures</h5>
+        <a href="{{ url_for('troubleshooting') }}" class="btn btn-sm btn-outline-primary">Open troubleshooting guides</a>
+      </div>
+
+      {% if stats.failures %}
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Device</th>
+              <th>Type</th>
+              <th>IP address</th>
+              <th>Status</th>
+              <th>Last check</th>
+              <th class="text-end">Help</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for device in stats.failures %}
+            <tr>
+              <td>
+                <span class="fw-semibold">{{ device.name }}</span>
+                <div class="small text-muted">{{ device.hostname }}</div>
+              </td>
+              <td><span class="badge rounded-pill type-badge">{{ device.device_type }}</span></td>
+              <td><code class="ip-cell">{{ device.ip_address }}</code></td>
+              <td>
+                {% if device.last_status == 'offline' %}
+                  <span class="badge rounded-pill st-offline">Offline</span>
+                {% else %}
+                  <span class="badge rounded-pill st-error">Check error</span>
+                {% endif %}
+              </td>
+              <td class="small text-muted">{{ device.last_checked_at or '—' }}</td>
+              <td class="text-end">
+                <a href="{{ url_for('troubleshooting_detail', slug=guide_for_status(device.last_status)) }}"
+                   class="btn btn-sm btn-outline-secondary">Troubleshoot</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="text-center text-muted py-4">
+        {% if stats.checked %}
+          <div class="fs-5 mb-1">No recent failures</div>
+          All checked devices are online or have not been checked yet.
+        {% else %}
+          <div class="fs-5 mb-1">Nothing to report yet</div>
+          Add devices and run <strong>Check now</strong> to start monitoring.
+        {% endif %}
+      </div>
+      {% endif %}
+    </div></div>
+  </div>
+</div>
+{% endblock %}

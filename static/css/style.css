@@ -1,0 +1,174 @@
+/* ============================================================
+   Network Monitor - custom styles layered on Bootstrap 5
+   ============================================================ */
+
+:root {
+  --nm-primary: #0ea5e9;
+  --nm-dark: #082f49;
+}
+
+body {
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+/* ---------- Navbar ---------- */
+.app-navbar {
+  background: linear-gradient(90deg, var(--nm-dark) 0%, var(--nm-primary) 100%);
+}
+.brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--nm-primary);
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+
+/* ---------- Stat cards ---------- */
+.stat-card {
+  border-left: 4px solid var(--nm-primary);
+  border-radius: 12px;
+}
+.stat-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #334155;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.stat-value {
+  font-size: 1.9rem;
+  font-weight: 800;
+  line-height: 1.2;
+  color: #0f172a;
+}
+.stat-unit {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #64748b;
+}
+.st-card-online { border-left-color: #16a34a; }
+.st-card-offline { border-left-color: #dc2626; }
+.st-card-error { border-left-color: #d97706; }
+.st-card-none { border-left-color: #94a3b8; }
+.st-card-latency { border-left-color: #2563eb; }
+
+/* ---------- Error page ---------- */
+.error-code {
+  font-size: 4.5rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* ---------- Device list ---------- */
+.type-badge {
+  background: #e0f2fe;
+  color: #075985;
+  font-weight: 600;
+  font-size: 0.72rem;
+  padding: 0.35em 0.7em;
+}
+.ip-cell {
+  font-family: "Consolas", "Cascadia Code", monospace;
+  font-size: 0.85rem;
+  background: #f1f5f9;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+/* ---------- Connectivity status ---------- */
+.st-online,
+.st-offline,
+.st-error,
+.st-none {
+  font-weight: 600;
+  font-size: 0.72rem;
+  padding: 0.35em 0.7em;
+}
+.st-online { background-color: #dcfce7; color: #15803d; }
+.st-offline { background-color: #fee2e2; color: #b91c1c; }
+.st-error { background-color: #fef3c7; color: #b45309; }
+.st-none { background-color: #e2e8f0; color: #475569; }
+
+/* ---------- Online vs Offline chart ---------- */
+.chart-wrap {
+  display: flex;
+  height: 34px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #e2e8f0;
+}
+.chart-segment { height: 100%; transition: width 0.3s ease; }
+.seg-online { background-color: #22c55e; }
+.seg-offline { background-color: #ef4444; }
+.seg-error { background-color: #f59e0b; }
+.chart-legend {
+  font-size: 0.86rem;
+  color: #334155;
+}
+.legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  margin-right: 5px;
+}
+.legend-dot.seg-online { background-color: #22c55e; }
+.legend-dot.seg-offline { background-color: #ef4444; }
+.legend-dot.seg-error { background-color: #f59e0b; }
+
+/* ---------- Response-time bars ---------- */
+.latency-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.latency-track {
+  height: 8px;
+  border-radius: 5px;
+  background: #e2e8f0;
+  overflow: hidden;
+}
+.latency-bar {
+  height: 100%;
+  border-radius: 5px;
+  background: linear-gradient(90deg, #22c55e, #059669);
+  min-width: 2px;
+}
+
+/* ---------- Troubleshooting ---------- */
+.guide-list li {
+  border-bottom: 1px dashed #e2e8f0;
+}
+.guide-list li:last-child {
+  border-bottom: none;
+}
+.guide-steps {
+  padding-left: 1.1rem;
+}
+.guide-steps li {
+  margin-bottom: 10px;
+  color: #1e293b;
+}
+.guide-steps li::marker {
+  font-weight: 700;
+  color: var(--nm-primary);
+}
+.cmd-cell {
+  font-family: "Consolas", "Cascadia Code", monospace;
+  font-size: 0.83rem;
+  background: #0f172a;
+  color: #a5f3fc;
+  padding: 4px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+/* ---------- Footer ---------- */
+main {
+  min-height: calc(100vh - 150px);
+}

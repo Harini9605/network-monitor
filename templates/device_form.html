@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-lg-8 col-xl-6">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <div class="mb-4">
+          <h4 class="mb-0 fw-bold">{{ 'Edit device' if device else 'Add a device' }}</h4>
+          <p class="text-muted small mb-0">
+            {% if device %}
+              Updating <strong>{{ device.name }}</strong>
+            {% else %}
+              Register a machine or network device you want to keep track of.
+            {% endif %}
+          </p>
+        </div>
+
+        <form method="post" id="deviceForm" novalidate
+              action="{{ url_for('edit_device', device_id=device.id) if device else url_for('new_device') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+          <div class="mb-3">
+            <label class="form-label" for="name">Device name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="name" name="name"
+                   required maxlength="50" placeholder="e.g. HR Shared Printer"
+                   value="{{ form.get('name','') }}">
+          </div>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label" for="ip_address">IP address <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="ip_address" name="ip_address"
+                     required placeholder="e.g. 192.168.1.50"
+                     pattern="[0-9a-fA-F.:]+" title="A valid IPv4 or IPv6 address"
+                     value="{{ form.get('ip_address','') }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="device_type">Device type <span class="text-danger">*</span></label>
+              <select class="form-select" id="device_type" name="device_type" required>
+                <option value="">Choose...</option>
+                {% for type in device_types %}
+                <option value="{{ type }}"
+                        {% if form.get('device_type') == type %}selected{% endif %}>{{ type }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="mb-3 mt-3">
+            <label class="form-label" for="hostname">Hostname <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="hostname" name="hostname"
+                   required placeholder="e.g. hr-printer-01"
+                   pattern="[A-Za-z0-9]([A-Za-z0-9\-]{0,61}[A-Za-z0-9])?(\.[A-Za-z0-9]([A-Za-z0-9\-]{0,61}[A-Za-z0-9])?)*"
+                   title="Letters, digits and hyphens (RFC 1123 hostname)"
+                   value="{{ form.get('hostname','') }}">
+            <div class="form-text">The hostname assigned inside the network (without domain).</div>
+          </div>
+
+          <div class="d-flex justify-content-between mt-4">
+            <a href="{{ url_for('list_devices') }}" class="btn btn-outline-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary px-4">
+              {{ 'Save changes' if device else 'Add device' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
